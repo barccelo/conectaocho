@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>Conecta 8</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#" id="homeButton" aria-label="Volver a configuración">
+        <span class="brand-mark" aria-hidden="true">8</span>
+        <span>Conecta 8</span>
+      </a>
+      <nav class="topbar-actions" aria-label="Acciones del juego">
+        <button class="button button-ghost" id="restartButton" type="button" hidden>Reiniciar misma partida</button>
+        <button class="button button-dark" id="homeNavButton" type="button">Inicio</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="screen is-active" id="setupScreen" aria-labelledby="setupTitle">
+        <div class="setup-panel">
+          <p class="eyebrow">Juego de palabras</p>
+          <h1 id="setupTitle">Prepara tu partida</h1>
+          <p class="lead">Escribe las ocho palabras que deberán descubrirse.</p>
+          <form id="setupForm" novalidate>
+            <div class="entry-mode-tabs" role="tablist" aria-label="Forma de introducir las palabras">
+              <button class="entry-mode-tab is-active" type="button" role="tab" aria-selected="true" data-entry-mode="sequential">Rellenado secuencial</button>
+              <button class="entry-mode-tab" type="button" role="tab" aria-selected="false" data-entry-mode="paste">Pegado rápido</button>
+            </div>
+            <div class="entry-panel" id="sequentialEntryPanel">
+              <div class="words-grid" id="wordInputs"></div>
+            </div>
+            <div class="entry-panel quick-entry" id="pasteEntryPanel" hidden>
+              <div class="quick-entry-toolbar">
+                <span>Una palabra por línea</span>
+                <div>
+                  <button type="button" class="mini-action" id="clearWordsButton">Limpiar</button>
+                  <button type="button" class="mini-action" id="copyWordsButton">Copiar</button>
+                  <button type="button" class="mini-action" id="pasteWordsButton">Pegar</button>
+                </div>
+              </div>
+              <textarea id="wordsTextarea" rows="8" placeholder="PERRO | Animal doméstico que ladra&#10;HUESO | Estructura rígida del esqueleto&#10;..."></textarea>
+              <p class="format-note">Formato opcional para usar pistas de definición: <strong>PALABRA | definición</strong></p>
+              <button type="button" class="ai-instruction-button" id="copyAiInstruction">Copiar instrucción para la IA</button>
+            </div>
+            <div class="time-setting" aria-labelledby="timeSettingLabel">
+              <span id="timeSettingLabel">Tiempo inicial</span>
+              <div class="time-stepper">
+                <button type="button" class="time-step-button" id="decreaseTime" aria-label="Restar 15 segundos">−</button>
+                <label class="time-input-wrap"><input id="initialTimeInput" type="text" inputmode="numeric" value="1:00" aria-label="Tiempo inicial en minutos y segundos"></label>
+                <button type="button" class="time-step-button" id="increaseTime" aria-label="Sumar 15 segundos">+</button>
+              </div>
+              <div class="time-presets" aria-label="Tiempos predeterminados">
+                <button type="button" data-time-preset="60">1 m</button><button type="button" data-time-preset="120">2 m</button><button type="button" data-time-preset="180">3 m</button><button type="button" data-time-preset="240">4 m</button><button type="button" data-time-preset="300">5 m</button>
+              </div>
+            </div>
+            <fieldset class="game-mode-setting">
+              <legend>Modalidad de juego</legend>
+              <div class="game-mode-options">
+                <button class="game-mode-option is-active" type="button" aria-pressed="true" data-game-mode="individual">
+                  <strong>Individual</strong>
+                  <span>Escribe con el teclado</span>
+                </button>
+                <button class="game-mode-option" type="button" aria-pressed="false" data-game-mode="host">
+                  <strong>Modo anfitrión</strong>
+                  <span>El anfitrión valida en voz alta</span>
+                </button>
+              </div>
+            </fieldset>
+            <label class="visibility-pause-setting" for="pauseOnHidden">
+              <span>
+                <strong>Pausar al salir de la pestaña</strong>
+                <small>También funciona al minimizar o bloquear el teléfono</small>
+              </span>
+              <input id="pauseOnHidden" type="checkbox" checked>
+              <span class="toggle-switch" aria-hidden="true"></span>
+            </label>
+            <p class="form-error" id="setupError" role="alert" aria-live="polite"></p>
+            <button class="button button-primary button-large" type="submit">Comenzar</button>
+          </form>
+        </div>
+      </section>
+
+      <section class="screen" id="gameScreen" aria-labelledby="gameTitle" hidden>
+        <div class="game-heading">
+          <div>
+            <p class="eyebrow">Partida en curso</p>
+            <h1 id="gameTitle">Descubre las palabras</h1>
+          </div>
+          <div class="timer" id="timer" aria-live="polite" aria-label="Tiempo restante">
+            <span class="timer-value" id="timerValue">01:00</span>
+            <span class="timer-label">segundos</span>
+          </div>
+        </div>
+        <div class="host-share-bar" id="hostShareBar" hidden>
+          <button class="button button-primary" id="shareParticipantButton" type="button">Compartir vista del participante</button>
+          <label class="player-input-toggle"><input id="allowPlayerInput" type="checkbox" checked> Permitir teclado del participante</label>
+          <div class="participant-link" id="participantLinkBox" hidden>
+            <input id="participantLink" type="text" readonly aria-label="Enlace del participante">
+            <button class="button" id="copyParticipantLinkButton" type="button">Copiar</button>
+          </div>
+          <span id="connectionStatus">Sin enlace compartido</span>
+        </div>
+        <p class="game-message" id="gameMessage" aria-live="polite"></p>
+        <div class="cards-grid" id="cardsGrid"></div>
+        <div class="onscreen-keyboard" id="onscreenKeyboard" aria-label="Teclado del juego"></div>
+        <div class="host-controls" id="hostControls" aria-label="Controles del anfitrión" hidden></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="hint-overlay" id="hintOverlay" hidden>
+    <section class="hint-dialog" role="dialog" aria-modal="true" aria-labelledby="hintDialogTitle">
+      <span class="hint-dialog-icon" id="hintDialogIcon" aria-hidden="true">💡</span>
+      <h2 id="hintDialogTitle">Elige una pista</h2>
+      <p id="hintDialogText">Selecciona cómo quieres recibir ayuda.</p>
+      <div class="hint-dialog-actions" id="hintDialogActions"></div>
+    </section>
+  </div>
+  <div class="game-toast" id="gameToast" role="status" aria-live="assertive" hidden><span class="game-toast-icon" aria-hidden="true"></span><strong class="game-toast-text"></strong></div>
+
+  <script src="timer.js" defer></script>
+  <script src="hints.js" defer></script>
+  <script src="game.js" defer></script>
+  <script src="ui.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
